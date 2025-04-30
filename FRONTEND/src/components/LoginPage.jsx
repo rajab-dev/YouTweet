@@ -1,17 +1,17 @@
 import axios from 'axios'
 import React, { useState } from 'react'
-import { Form, redirect } from 'react-router-dom'
+import { Form, Link, redirect, useNavigate } from 'react-router-dom'
 
 
 function LoginPage() {
-    
+  const navigate = useNavigate();
   const [errormessage, seterror] = useState(null);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const data = Object.fromEntries(formData);
-    await handlelogin(data, seterror);
+    await handlelogin(data, seterror, navigate);
   };
 
 
@@ -46,6 +46,12 @@ function LoginPage() {
       <input id="username" name='username' type="text" placeholder="Enter your username" className="mb-4 rounded-lg border bg-transparent px-3 py-2" required/>
       <label htmlFor="password" className="mb-1 inline-block text-gray-300">Password*</label>
       <input id="password" name='password' type="password" placeholder="Enter your password" className="mb-4 rounded-lg border bg-transparent px-3 py-2" />
+      <p className="mb-4 text-sm text-gray-400">
+      Don’t have an account?{" "}
+      <Link to="/sign-up" className="text-[#ae7aff] hover:underline">
+        Register
+      </Link>
+    </p>
       <button type='submit' className="bg-[#ae7aff] px-4 py-3 text-black">Sign in</button>
     
     </div>
@@ -54,8 +60,8 @@ function LoginPage() {
   )
 }
 
-export async function handlelogin(postdata, seterror){
-
+export async function handlelogin(postdata, seterror, navigate){
+  // const navigate = useNavigate();
     
        try {
         fetch('http://localhost:4000/api/v1/users/login', {
@@ -74,8 +80,10 @@ export async function handlelogin(postdata, seterror){
           console.log(post.error)
           seterror(post.error)
          }else{
-          console.log("from if  else ", post)
+          // console.log("from if  else ", post)
+          navigate("/home");
            localStorage.setItem("token",post.data.accesstoken)
+
 
          }
        }))

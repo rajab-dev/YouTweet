@@ -7,9 +7,7 @@ app.set("view engine", "ejs");
 
 app.use(express.static("rough")); 
 
-dotenv.config({
-  path: "./env"
-})
+dotenv.config();
 connectDB()
 .then(() =>{
   app.listen(process.env.PORT || 8000,()=>{

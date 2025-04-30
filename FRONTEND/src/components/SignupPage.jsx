@@ -1,9 +1,9 @@
 import React from 'react'
-import { Form, redirect } from 'react-router-dom'
+import { Form, Link, redirect } from 'react-router-dom'
 
 function SignupPage() {
   return (
-    <Form  method='post' encType='multipart/form-data' >
+    <Form  method='post' encType="multipart/form-data" >
     <div className="h-screen overflow-y-auto bg-[#121212] text-white">
     <div className="mx-auto my-8 flex w-full max-w-sm flex-col px-4">
       <div className="mx-auto inline-block w-16">
@@ -45,6 +45,12 @@ function SignupPage() {
         className="mb-1 inline-block text-gray-300">Coverimage*</label>
         <input name="coverimage" id="coverimage" type="file"
         placeholder="Enter your email" className="mb-4 rounded-lg border w-full bg-transparent px-3 py-2" />
+              <p className="mb-4 text-sm text-gray-400">
+              already have an account?{" "}
+              <Link to="/login" className="text-[#ae7aff] hover:underline">
+                Login
+              </Link>
+            </p>
       <button type='submit' className="bg-[#ae7aff] px-4 py-3 text-black">Register</button>
     
     </div>
@@ -108,6 +114,8 @@ export async function handleregister({ request }) {
   formPayload.append('avatar', formData.get('avatar'));
   formPayload.append('coverimage', formData.get('coverimage'));
 
+  // console.log("form payload ",formData)
+  console.log("form payload", [...formData.entries()]);
   try {
     const response = await fetch('http://localhost:4000/api/v1/users/register', {
       method: 'POST',
@@ -119,9 +127,10 @@ export async function handleregister({ request }) {
       console.log( { error: result.error });
     }else{
       console.log(result)
+
     }
 
-    return redirect("/sign-up");
+    return redirect("/login");
   } catch (error) {
     console.error('Registration error:', error);
     return { error: 'Registration failed. Please try again.' };
