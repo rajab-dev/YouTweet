@@ -184,8 +184,8 @@ const loginuser = asyncHandler(async (req,res) => {
  const ispasswordvalid =  await user.ispasswordcorreect(password)
 
  if(!ispasswordvalid) {
-    throw new ApiError(401,"invalid credentials") 
-    // res.json({error:"invalid password"})
+    // throw new ApiError(401,"invalid credentials") 
+   return res.json({error:"invalid credentials"})
  }
  
  const { accesstoken, refreshtoken } = await generateaccessandrefreshtoken(user._id)
