@@ -21,7 +21,7 @@ const app = express()
 
 app.use(session({
 
-  secret: 'hjkshkjhkjhdskjfhdskjfhkdjshfkjsdhfkjds',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true
   
@@ -75,16 +75,13 @@ const registeruser = asyncHandler(async (req,res) => {
    // check for user creation
    // return response 
    
-   const { username, password, email, fullname, avatar, coverimage} = req.body
+   const { username, password, email, fullname } = req.body
 
-  //  res.status(201).json({
-  //   username,
-  //    password,
-  //     email,
-  //      fullname, 
-  //      avatar,
-  //  })
-   if((username  === ""|| password === ""|| email === ""|| fullname === "" || avatar === "") ){
+   const avatar = req.files?.avatar?.[0] || null;
+   const coverimage = req.files?.coverimage?.[0] || null;
+console.log( avatar, coverimage)
+
+   if((username  === ""|| password === ""|| email === ""|| fullname === "" || avatar === null) ){
       // throw new ApiError(400,"all fields are required")
    res.json({error:"all fields are required"})
 
@@ -101,9 +98,9 @@ const registeruser = asyncHandler(async (req,res) => {
   }else{
 
 
-    const avatarlocalpath = req.files?.avatar[0]?.path;
+    const avatarlocalpath = req.files?.avatar?.[0]?.path;
     // const coverlocalpath = req.files?.coverimage[0]?.path;
-
+    console.log("avatarlocalpath", avatarlocalpath)
     if(!avatarlocalpath){
 
       // throw new ApiError(400,"avatar field is required");
@@ -115,7 +112,7 @@ const registeruser = asyncHandler(async (req,res) => {
                       
    let coverlocalpath;
    if(req.files && Array.isArray(req.files.coverimage) && req.files.coverimage.length > 0){
-      coverlocalpath = req.files.coverimage[0].path;
+      coverlocalpath = req.files?.coverimage?.[0].path;
    } 
 
 
@@ -125,13 +122,13 @@ const registeruser = asyncHandler(async (req,res) => {
 
     
 
-
+console.log("user to be created", username, password, email, fullname, avatar, coverimage)
   const createduser =  await userModel.create({
     username,
      password,
       email,
        fullname, 
-       avatar:avatar?.url,
+       avatar:avatar?.url || "",
        coverimage:coverimage?.url || "",
    })
 console.log(createduser)
@@ -174,17 +171,21 @@ const loginuser = asyncHandler(async (req,res) => {
     $or: [{ username }, { email }]
    })
 
+  //  const allUsers = await userModel.find()
+
+  //  console.log("user from login ", user);
+  //  console.log("all users ", allUsers);
   if(!user){
     // throw new ApiError(404, "user doesnot exists")
-    res.json({error:"user doesnot exists"})
+   return res.json({error:"user doesnot exists"})
 
   }
 
  const ispasswordvalid =  await user.ispasswordcorreect(password)
 
  if(!ispasswordvalid) {
-    // throw new ApiError(401,"password is incorrect") 
-    res.json({error:"invalid password"})
+    throw new ApiError(401,"invalid credentials") 
+    // res.json({error:"invalid password"})
  }
  
  const { accesstoken, refreshtoken } = await generateaccessandrefreshtoken(user._id)
@@ -192,8 +193,9 @@ const loginuser = asyncHandler(async (req,res) => {
     const loggedinuser = await userModel.findById(user._id).select("-password -refreshtoken")
 
     const options = {
-       httpOnly: true,
-       secure: true 
+      httpOnly: true,
+      sameSite: "none",
+      secure: true, 
     }
 
     return res
@@ -250,7 +252,8 @@ const logoutuser = asyncHandler(async(req,res) => {
 
      const options = {
       httpOnly: true,
-      secure: true 
+      sameSite: "none",
+      secure: true, 
    }
 
    return res.status(200)
@@ -288,8 +291,9 @@ const refreshaccesstoken = asyncHandler(async(req,res) => {
      }
   
       const options = {
-         httpOnly:true,
-         secure: true
+        httpOnly: true,
+        sameSite: "none",
+        secure: true, 
       }  
   
      const {accesstoken, newrefreshtoken} = await generateaccessandrefreshtoken(user._id)

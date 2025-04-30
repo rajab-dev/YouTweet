@@ -8,16 +8,18 @@ cloudinary.config({
 });
 
 const uploadONCloudinary = async (localfilepath) => {
+  // console.log("localfilepath from uploadONCloudinary ", localfilepath)
    try {
      if(!localfilepath) return null
     const response =  await cloudinary.uploader.upload(localfilepath, {
       resource_type: 'auto',
      })
-    //  console.log("file is uploaded on cloudinary", response.url); 
+    //  console.log("file is uploaded on cloudinary", response); 
     fs.unlinkSync(localfilepath)
      return response
    } catch (error) {
     // remove temporay file in case of error
+    // console.log("error in clodinary ", error);
       fs.unlinkSync(localfilepath);
    }
 }

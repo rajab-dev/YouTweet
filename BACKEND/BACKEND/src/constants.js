@@ -1,2 +1,2 @@
- const   DB_NAME = "YOUTUBE_REACT";
+ const   DB_NAME = "youtube_Clone";
  export { DB_NAME }
